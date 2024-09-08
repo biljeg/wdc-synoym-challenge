@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { fetchSynoyms } from "../api/fetchSynoyms";
+
 export type SynonymType = {
   word: string;
   score: number;

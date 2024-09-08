@@ -1,34 +1,44 @@
-import { FormEvent, useState } from "react";
 import { useGetSynoyms } from "./hooks/useGetSynonyms";
+import { useForm, SubmitHandler } from "react-hook-form";
+
+// ADD REACT HOOK FORM,
+// AXIOS AND REACT QUERY
+
+type Inputs = {
+  word: string;
+};
 
 function App() {
-  const [word, setWord] = useState<string>("");
   const { isLoading, synonyms, getSynonyms } = useGetSynoyms();
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<Inputs>({ defaultValues: { word: "" } });
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    getSynonyms(word);
-  };
+  const onSubmit: SubmitHandler<Inputs> = data => getSynonyms(data.word);
 
   const handleSynoymClick = async (newWord: string) => {
-    setWord(newWord);
-    getSynonyms(word);
+    setValue("word", newWord);
+    handleSubmit(onSubmit)();
   };
 
   return (
-    <main className="min-h-screen w-screen flex justify-center items-center flex-col gap-10">
-      <form onSubmit={handleSubmit} className="flex gap-4 items-end">
+    <main className="flex flex-col items-center justify-center w-screen min-h-screen gap-10">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8">
         <div className="flex flex-col gap-2">
-          <label htmlFor="word-input">Word</label>
+          <label htmlFor="word-input">Your word</label>
           <input
-            value={word}
-            onChange={e => setWord(e.target.value)}
+            {...register("word", { required: true })}
             id="word-input"
-            name="word"
             type="text"
             placeholder="Type something here..."
-            className="rounded-lg p-4"
+            className="p-4 rounded-lg"
           />
+          {errors.word && (
+            <span className="text-red-400">This field is required</span>
+          )}
         </div>
         <button type="submit">Find synonyms</button>
       </form>
@@ -37,7 +47,11 @@ function App() {
       ) : (
         <ul className="flex flex-col gap-2">
           {synonyms.map(({ word, score }) => (
-            <li key={score} onClick={() => handleSynoymClick(word)}>
+            <li
+              className="cursor-pointer hover:text-[#646cff]"
+              key={score}
+              onClick={() => handleSynoymClick(word)}
+            >
               {word}
             </li>
           ))}
