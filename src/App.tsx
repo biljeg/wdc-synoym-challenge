@@ -1,15 +1,17 @@
-import { useGetSynoyms } from "./hooks/useGetSynonyms";
 import { useForm, SubmitHandler } from "react-hook-form";
+import useSynonymQuery from "./hooks/useSynonymQuery";
 
-// ADD REACT HOOK FORM,
-// AXIOS AND REACT QUERY
+export type SynonymType = {
+  word: string;
+  score: number;
+};
 
 type Inputs = {
   word: string;
 };
 
 function App() {
-  const { isLoading, synonyms, getSynonyms } = useGetSynoyms();
+  const [{ data, isFetching }, setWord] = useSynonymQuery();
   const {
     register,
     handleSubmit,
@@ -17,7 +19,9 @@ function App() {
     formState: { errors },
   } = useForm<Inputs>({ defaultValues: { word: "" } });
 
-  const onSubmit: SubmitHandler<Inputs> = data => getSynonyms(data.word);
+  const onSubmit: SubmitHandler<Inputs> = data => {
+    setWord(data.word);
+  };
 
   const handleSynoymClick = async (newWord: string) => {
     setValue("word", newWord);
@@ -42,11 +46,11 @@ function App() {
         </div>
         <button type="submit">Find synonyms</button>
       </form>
-      {isLoading ? (
+      {isFetching ? (
         <h4>Loading...</h4>
       ) : (
         <ul className="flex flex-col gap-2">
-          {synonyms.map(({ word, score }) => (
+          {data?.map(({ word, score }) => (
             <li
               className="cursor-pointer hover:text-[#646cff]"
               key={score}
